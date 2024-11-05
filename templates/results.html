@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resultados</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column; /* Organiza en columnas */
+            align-items: center; /* Centra el contenido horizontalmente */
+            margin: 20px;
+        }
+        .image-row {
+            display: flex; /* Organiza las imágenes en una fila */
+            justify-content: space-around; /* Espacio igual entre imágenes */
+            width: 100%; /* Ancho completo */
+            margin-bottom: 20px; /* Espacio entre filas */
+        }
+        .image-container {
+            text-align: center; /* Centra el texto y las imágenes */
+            width: 18%; /* Ajustar según el número de imágenes por fila */
+        }
+        img {
+            max-width: 100%; /* Asegura que las imágenes no se desborden */
+            height: auto;
+        }
+        .container {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100vh;
+            background-color: #f1f1bc;
+            color: black;
+            text-align: center;
+        }
+        .containerHeader {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="container">
+    <div class="containerHeader">
+        <h1>Resultados de las Operaciones Morfológicas</h1>
+        <img src="{{ url_for('static', filename='Header.webp') }}" alt="Image header" width="50%">
+    </div>
+
+    {% for filename, operations in results.items() %}
+        <h2>{{ filename }}</h2>
+        <div class="image-row">
+            <div class="image-container">
+                <h3>Erosión</h3>
+                <img src="{{ url_for('static', filename='uploads/' + operations.erosion) }}" alt="Erosión">
+            </div>
+            <div class="image-container">
+                <h3>Dilatación</h3>
+                <img src="{{ url_for('static', filename='uploads/' + operations.dilation) }}" alt="Dilatación">
+            </div>
+            <div class="image-container">
+                <h3>Top Hat</h3>
+                <img src="{{ url_for('static', filename='uploads/' + operations.top_hat) }}" alt="Top Hat">
+            </div>
+            <div class="image-container">
+                <h3>Black Hat</h3>
+                <img src="{{ url_for('static', filename='uploads/' + operations.black_hat) }}" alt="Black Hat">
+            </div>
+            <div class="image-container">
+                <h3>Imagen Mejorada</h3>
+                <img src="{{ url_for('static', filename='uploads/' + operations.enhanced_image) }}" alt="Imagen Mejorada">
+            </div>
+        </div>
+    {% endfor %}
+</body>
+</html>
+
