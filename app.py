@@ -13,33 +13,39 @@ import os
 
 app = Flask(__name__)
 
-# Ruta para almacenar las imágenes subidas
 UPLOAD_FOLDER = 'static/uploads'
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 
 def apply_morphological_operations(image_path):
     image = cv2.imread(image_path, cv2.IMREAD_GRAYSCALE)
     
-    # Definir el tamaño de la máscara
-    kernel_size = 37
-    kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
+    kernel_sizes = [21, 37, 55]
+    results = {}
 
-    # Erosión
-    erosion = cv2.erode(image, kernel)
+    for kernel_size in kernel_sizes:
+        kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_size, kernel_size))
 
-    # Dilatación
-    dilation = cv2.dilate(image, kernel)
+        # Erosión
+        erosion = cv2.erode(image, kernel)
+        results[f'erosion_{kernel_size}'] = erosion
 
-    # Top Hat
-    top_hat = cv2.morphologyEx(image, cv2.MORPH_TOPHAT, kernel)
+        # Dilatación
+        dilation = cv2.dilate(image, kernel)
+        results[f'dilation_{kernel_size}'] = dilation
 
-    # Black Hat
-    black_hat = cv2.morphologyEx(image, cv2.MORPH_BLACKHAT, kernel)
+        # Top Hat
+        top_hat = cv2.morphologyEx(image, cv2.MORPH_TOPHAT, kernel)
+        results[f'top_hat_{kernel_size}'] = top_hat
 
-    # Imagen Original + (Top Hat - Black Hat)
-    enhanced_image = cv2.add(image, cv2.subtract(top_hat, black_hat))
+        # Black Hat
+        black_hat = cv2.morphologyEx(image, cv2.MORPH_BLACKHAT, kernel)
+        results[f'black_hat_{kernel_size}'] = black_hat
 
-    return erosion, dilation, top_hat, black_hat, enhanced_image
+        # Imagen Original + (Top Hat - Black Hat)
+        enhanced_image = cv2.add(image, cv2.subtract(top_hat, black_hat))
+        results[f'imagen_mejorada_{kernel_size}'] = enhanced_image
+
+    return results
 
 @app.route('/')
 def index():
@@ -51,7 +57,7 @@ def upload_file():
         return redirect(request.url)
 
     files = request.files.getlist('files[]')
-    results = {}
+    all_results = {}
 
     for file in files:
         if file.filename == '':
@@ -60,23 +66,16 @@ def upload_file():
         file_path = os.path.join(UPLOAD_FOLDER, file.filename)
         file.save(file_path)
 
-        erosion, dilation, top_hat, black_hat, enhanced_image = apply_morphological_operations(file_path)
+        results = apply_morphological_operations(file_path)
 
-        # Guardar las imágenes procesadas
-        results[file.filename] = {
-            'erosion': 'erosion_' + file.filename,
-            'dilation': 'dilation_' + file.filename,
-            'top_hat': 'top_hat_' + file.filename,
-            'black_hat': 'black_hat_' + file.filename,
-            'enhanced_image': 'enhanced_image_' + file.filename
-        }
-        cv2.imwrite(os.path.join(UPLOAD_FOLDER, results[file.filename]['erosion']), erosion)
-        cv2.imwrite(os.path.join(UPLOAD_FOLDER, results[file.filename]['dilation']), dilation)
-        cv2.imwrite(os.path.join(UPLOAD_FOLDER, results[file.filename]['top_hat']), top_hat)
-        cv2.imwrite(os.path.join(UPLOAD_FOLDER, results[file.filename]['black_hat']), black_hat)
-        cv2.imwrite(os.path.join(UPLOAD_FOLDER, results[file.filename]['enhanced_image']), enhanced_image)
+        all_results[file.filename] = {'original': file.filename}
+        for key, img in results.items():
+            result_filename = f"{key}_{file.filename}"
+            all_results[file.filename][key] = result_filename
+            cv2.imwrite(os.path.join(UPLOAD_FOLDER, result_filename), img)
 
-    return render_template('results.html', results=results)
+    return render_template('results.html', results=all_results)
 
 if __name__ == '__main__':
     app.run(debug=True)
+

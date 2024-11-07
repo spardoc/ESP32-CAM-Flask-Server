@@ -7,22 +7,22 @@
     <style>
         body {
             display: flex;
-            flex-direction: column; /* Organiza en columnas */
-            align-items: center; /* Centra el contenido horizontalmente */
+            flex-direction: column;
+            align-items: center;
             margin: 20px;
         }
         .image-row {
-            display: flex; /* Organiza las imágenes en una fila */
-            justify-content: space-around; /* Espacio igual entre imágenes */
-            width: 100%; /* Ancho completo */
-            margin-bottom: 20px; /* Espacio entre filas */
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 20px;
         }
         .image-container {
-            text-align: center; /* Centra el texto y las imágenes */
-            width: 18%; /* Ajustar según el número de imágenes por fila */
+            text-align: center;
+            width: 18%;
         }
         img {
-            max-width: 100%; /* Asegura que las imágenes no se desborden */
+            max-width: 100%;
             height: auto;
         }
         .container {
@@ -49,29 +49,29 @@
 
     {% for filename, operations in results.items() %}
         <h2>{{ filename }}</h2>
+        
         <div class="image-row">
             <div class="image-container">
-                <h3>Erosión</h3>
-                <img src="{{ url_for('static', filename='uploads/' + operations.erosion) }}" alt="Erosión">
-            </div>
-            <div class="image-container">
-                <h3>Dilatación</h3>
-                <img src="{{ url_for('static', filename='uploads/' + operations.dilation) }}" alt="Dilatación">
-            </div>
-            <div class="image-container">
-                <h3>Top Hat</h3>
-                <img src="{{ url_for('static', filename='uploads/' + operations.top_hat) }}" alt="Top Hat">
-            </div>
-            <div class="image-container">
-                <h3>Black Hat</h3>
-                <img src="{{ url_for('static', filename='uploads/' + operations.black_hat) }}" alt="Black Hat">
-            </div>
-            <div class="image-container">
-                <h3>Imagen Mejorada</h3>
-                <img src="{{ url_for('static', filename='uploads/' + operations.enhanced_image) }}" alt="Imagen Mejorada">
+                <h5>Imagen Original</h5>
+                <img src="{{ url_for('static', filename='uploads/' + operations['original']) }}" alt="Original Image">
             </div>
         </div>
+        
+        {% set mask_sizes = [21, 37, 55] %}
+        {% for size in mask_sizes %}
+            <div class="image-row">
+                {% for operation, image_name in operations.items() %}
+                    {% if operation != 'original' and operation.endswith('_' + size|string) %}
+                        <div class="image-container">
+                            <h5>{{ operation.replace('_' + size|string, '').replace('_', ' ').title() }} ({{ size }})</h5>
+                            <img src="{{ url_for('static', filename='uploads/' + image_name) }}" alt="{{ operation.replace('_', ' ').title() }}">
+                        </div>
+                    {% endif %}
+                {% endfor %}
+            </div>
+        {% endfor %}
     {% endfor %}
 </body>
 </html>
+
 

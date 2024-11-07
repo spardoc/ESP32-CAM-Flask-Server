@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cargar Imágenes Médicas</title>
+    <title>Operaciones Morfólogicas</title>
     <style>
         .container {
             margin: 0;
@@ -23,15 +23,30 @@
             margin-top: 3rem;
         }
     </style>
+    <script>
+        function validateFileInput() {
+            const fileInput = document.getElementById("fileInput");
+            const submitButton = document.getElementById("submitButton");
+
+            if (fileInput.files.length > 3) {
+                alert("Solo puede cargar hasta un máximo de 3 imágenes.");
+                fileInput.value = "";
+                submitButton.disabled = true;
+            } else {
+                submitButton.disabled = false;
+            }
+        }
+    </script>
 </head>
 <body class="container">
     <div class="containerHeader">
-        <h1>Cargar Imágenes Médicas</h1>
+        <h1>Operaciones Morfológicas para imágenes médicas</h1>
         <img src="{{ url_for('static', filename='Header.webp') }}" alt="Image header" width="50%">
     </div>
+    <h2>Solo puede cargar hasta un máximo de 3 imágenes</h2>
     <form class="form" action="/upload" method="post" enctype="multipart/form-data">
-        <input type="file" name="files[]" accept="image/*" required multiple>
-        <input type="submit" value="Cargar">
+        <input type="file" id="fileInput" name="files[]" accept="image/*" required multiple onchange="validateFileInput()">
+        <input type="submit" id="submitButton" value="Cargar">
     </form>
 </body>
 </html>
